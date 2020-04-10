@@ -1,0 +1,52 @@
+{
+	"name": "ProcessedOrderRecords",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "chanAzurePOSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "orderid",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "orderdate",
+				"type": "date"
+			},
+			{
+				"name": "customer",
+				"type": "varchar"
+			},
+			{
+				"name": "billingaddress",
+				"type": "varchar"
+			},
+			{
+				"name": "shippingaddress",
+				"type": "varchar"
+			},
+			{
+				"name": "units",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "amount",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "remarks",
+				"type": "text"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "ProcessedOrders"
+		}
+	}
+}
