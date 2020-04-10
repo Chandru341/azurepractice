@@ -1,0 +1,272 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "chanazureadfv2"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/OrdersBlobDataSet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "chanIOBlobStorageConn",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "InternetOrders.csv",
+						"container": "data-files"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "orderid",
+						"type": "String"
+					},
+					{
+						"name": "orderdate",
+						"type": "Datetime"
+					},
+					{
+						"name": "customer",
+						"type": "String"
+					},
+					{
+						"name": "billingaddress",
+						"type": "String"
+					},
+					{
+						"name": "shippingaddress",
+						"type": "String"
+					},
+					{
+						"name": "units",
+						"type": "Int32"
+					},
+					{
+						"name": "amount",
+						"type": "Int32"
+					},
+					{
+						"name": "remarks",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ProcessedOrderRecords')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "chanAzurePOSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "orderid",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "orderdate",
+						"type": "date"
+					},
+					{
+						"name": "customer",
+						"type": "varchar"
+					},
+					{
+						"name": "billingaddress",
+						"type": "varchar"
+					},
+					{
+						"name": "shippingaddress",
+						"type": "varchar"
+					},
+					{
+						"name": "units",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "amount",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "remarks",
+						"type": "text"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "ProcessedOrders"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ProcessBlobToDB",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBatchSize": 10000,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "orderid",
+											"type": "String"
+										},
+										"sink": {
+											"name": "orderid",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"name": "orderdate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "orderdate",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "customer",
+											"type": "String"
+										},
+										"sink": {
+											"name": "customer",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "billingaddress",
+											"type": "String"
+										},
+										"sink": {
+											"name": "billingaddress",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "shippingaddress",
+											"type": "String"
+										},
+										"sink": {
+											"name": "shippingaddress",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "units",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "units",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"name": "amount",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "amount",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"name": "remarks",
+											"type": "String"
+										},
+										"sink": {
+											"name": "remarks",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "OrdersBlobDataSet",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ProcessedOrderRecords",
+								"type": "DatasetReference"
+							}
+						]
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/OrdersBlobDataSet')]",
+				"[concat(variables('factoryId'), '/datasets/ProcessedOrderRecords')]"
+			]
+		}
+	]
+}
