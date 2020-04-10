@@ -1,0 +1,56 @@
+{
+	"name": "OrdersBlobDataSet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "chanIOBlobStorageConn",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "InternetOrders.csv",
+				"container": "data-files"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "orderid",
+				"type": "String"
+			},
+			{
+				"name": "orderdate",
+				"type": "Datetime"
+			},
+			{
+				"name": "customer",
+				"type": "String"
+			},
+			{
+				"name": "billingaddress",
+				"type": "String"
+			},
+			{
+				"name": "shippingaddress",
+				"type": "String"
+			},
+			{
+				"name": "units",
+				"type": "Int32"
+			},
+			{
+				"name": "amount",
+				"type": "Int32"
+			},
+			{
+				"name": "remarks",
+				"type": "String"
+			}
+		]
+	}
+}
